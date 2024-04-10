@@ -1,7 +1,7 @@
 # This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
 
-name: Node.js CI
+name: build & run
 
 on:
   push:
@@ -13,11 +13,15 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [16.x, 18.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+    permissions:
+        # Required to allow actions/checkout to clone the repository onto the runner
+        contents: read
+        # Required to allow the vitest coverage action to write a comment into the pull request
+        pull-requests: write
+        strategy:
+          matrix:
+            node-version: [16.x, 18.x]
+            # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
     - uses: actions/checkout@v3
@@ -28,4 +32,10 @@ jobs:
         cache: 'npm'
     - run: npm ci
     - run: npm run build --if-present
-    - run: npm test
+    - run: npm run test
+    - uses: davelosert/vitest-coverage-report-action@v1
+      with:
+        vite-config-path: vite.config.ts
+
+
+    
